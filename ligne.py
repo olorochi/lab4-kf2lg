@@ -16,7 +16,7 @@ from param import (
     MSG_INIT,
     MSG_POSITION,
     MSG_SONAR,
-    MSG_OBSTACLE,
+    MSG_BLOQUE,
     SEUIL_SONAR_ARRET_CM,
     SEUIL_SONAR_RAPIDE_CM,
     VITESSE_INITIALE,
@@ -137,7 +137,7 @@ class Ligne(EvApp):
     def _envoyer_obstacle(self, obstacle, distance):
         if self._obstacle != obstacle:
             self._obstacle = obstacle
-            if self._envoyer_controleur(MSG_OBSTACLE, obstacle):
+            if self._envoyer_controleur(MSG_BLOQUE, obstacle):
                 if obstacle:
                     self._afficher(
                         f"Obstacle a {distance:.2f} cm: "

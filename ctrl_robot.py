@@ -31,7 +31,8 @@ from param import (
     MSG_POSITION,
     MSG_RECULER,
     MSG_VITESSE,
-    MSG_OBSTACLE,
+    MSG_BLOQUE,
+    MSG_DEBLOQUE,
     VITESSE_MAX,
     VITESSE_MIN,
 )
@@ -76,14 +77,6 @@ class CtrlRobot(EvApp):
             raise ValueError("Vitesse manquante")
         vitesse = float(donnees[0])
         return max(VITESSE_MIN, min(VITESSE_MAX, vitesse))
-
-    @staticmethod
-    def lire_obstacle(evenement):
-        print(evenement)
-        donnees = evenement.split()
-        if not donnees or donnees[0] == "":
-            raise ValueError("Valeur manquante")
-        return donnees[0] == "True"
 
     def avancer(self):
         if not self.obstacle:
@@ -154,15 +147,16 @@ class CtrlRobot(EvApp):
         return True
 
     def _traiter_commande(self, evenement):
-        if evenement.type == MSG_OBSTACLE:
-            self.obstacle = self.lire_obstacle(evenement)
-            print(f"MSG_OBSTACLE recu. {self.obstacle}")
-
+        if evenement.type == MSG_BLOQUE:
+            print("MSG_BLOQUE recu.")
             if self.action == MSG_AVANCER:
-                if self.obstacle:
-                    self.robot.arreter()
-                else:
-                    self.robot.avancer()
+                self.robot.arreter()
+            return
+        
+        if evenement.type == MSG_DEBLOQUE:
+            print("MSG_DEBLOQUE recu.")
+            if self.action == MSG_AVANCER:
+                self.robot.arreter()
             return
 
         if evenement.type == MSG_VITESSE:
