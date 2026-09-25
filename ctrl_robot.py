@@ -151,39 +151,32 @@ class CtrlRobot(EvApp):
             print("MSG_BLOQUE recu.")
             if self.action == MSG_AVANCER:
                 self.robot.arreter()
-            return
-        
-        if evenement.type == MSG_DEBLOQUE:
+        elif evenement.type == MSG_DEBLOQUE:
             print("MSG_DEBLOQUE recu.")
             if self.action == MSG_AVANCER:
                 self.robot.arreter()
-            return
-
-        if evenement.type == MSG_VITESSE:
+        elif evenement.type == MSG_VITESSE:
             self.robot.vitesse = self.lire_vitesse(evenement)
             print(f"MSG_VITESSE recu. {self.robot.vitesse}")
-            return
-
-        if evenement.type == MSG_INIT:
+        elif evenement.type == MSG_INIT:
             self.initialiser_odometrie()
             print(f"MSG_INIT recu.")
-            return
+        else:
+            action = self._actions.get(evenement.type)
+            if action is None:
+                print(f"Message inconnu ignore: {evenement.type}")
+                return
 
-        action = self._actions.get(evenement.type)
-        if action is None:
-            print(f"Message inconnu ignore: {evenement.type}")
-            return
-
-        try:
-            self.action = evenement.type
-            action()
-            print(
-                f"Commande recue: type={evenement.type}, "
-                f"vitesse={self.robot.vitesse:.2f}."
-            )
-        except ValueError as erreur:
-            self.robot.arreter()
-            print(f"Commande invalide, robot arrete: {erreur}")
+            try:
+                self.action = evenement.type
+                action()
+                print(
+                    f"Commande recue: type={evenement.type}, "
+                    f"vitesse={self.robot.vitesse:.2f}."
+                )
+            except ValueError as erreur:
+                self.robot.arreter()
+                print(f"Commande invalide, robot arrete: {erreur}")
 
     def dispatch_event(self, evenement):
         if evenement is not None:
