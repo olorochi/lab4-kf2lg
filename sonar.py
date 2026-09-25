@@ -128,7 +128,6 @@ class Signaleur:
 
 
 class Lisseur:
-
     def __init__(self, grandeur_fenetre):
         grandeur_fenetre = int(grandeur_fenetre)
         if grandeur_fenetre <= 0:
@@ -162,7 +161,6 @@ class Lisseur:
 
 
 class Sonar:
-
     def __init__(
         self,
         gpio_trigger,
@@ -193,7 +191,6 @@ class Sonar:
         self._horloge = horloge
         self._dormir = dormir
         self._identifiant = identifiant
-        self._verrou_mesure = threading.Lock()
         self._debut_echo = None
         self._mesure_en_attente = False
         self._periode_signaleur = None
@@ -206,22 +203,20 @@ class Sonar:
         self._echo.when_deactivated = self._front_descendant
 
     def _front_montant(self, _entree=None):
-        with self._verrou_mesure:
-            if not self._arrete and self._mesure_en_attente:
-                self._debut_echo = self._horloge()
+        if not self._arrete and self._mesure_en_attente:
+            self._debut_echo = self._horloge()
 
     def _front_descendant(self, _entree=None):
         fin_echo = self._horloge()
-        with self._verrou_mesure:
-            if (
-                self._arrete
-                or not self._mesure_en_attente
-                or self._debut_echo is None
-            ):
-                return
-            duree = fin_echo - self._debut_echo
-            self._debut_echo = None
-            self._mesure_en_attente = False
+        if (
+            self._arrete
+            or not self._mesure_en_attente
+            or self._debut_echo is None
+        ):
+            return
+        duree = fin_echo - self._debut_echo
+        self._debut_echo = None
+        self._mesure_en_attente = False
 
         distance = VITESSE_SON_CM_S * duree / 2.0
         if not math.isfinite(distance) or distance <= 0:
@@ -274,12 +269,11 @@ class Sonar:
             print(f"MSG_SONAR non transmis a ligne.py: {erreur}")
 
     def mesurer(self):
-        with self._verrou_mesure:
-            if self._arrete:
-                return
-            mesure_sans_echo = self._mesure_en_attente
-            self._mesure_en_attente = True
-            self._debut_echo = None
+        if self._arrete:
+            return
+        mesure_sans_echo = self._mesure_en_attente
+        self._mesure_en_attente = True
+        self._debut_echo = None
 
         if mesure_sans_echo:
             self._traiter_distance(DISTANCE_SONAR_MAX_CM)
@@ -291,12 +285,11 @@ class Sonar:
             self._trigger.off()
 
     def arreter(self):
-        with self._verrou_mesure:
-            if self._arrete:
-                return
-            self._arrete = True
-            self._debut_echo = None
-            self._mesure_en_attente = False
+        if self._arrete:
+            return
+        self._arrete = True
+        self._debut_echo = None
+        self._mesure_en_attente = False
 
         try:
             fermer = getattr(self._signaleur, "fermer", None)
