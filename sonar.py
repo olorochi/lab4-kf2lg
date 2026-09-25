@@ -1,3 +1,5 @@
+#!/bin/python3
+
 """Mesure des deux sonars et signalisation par DEL."""
 
 import math
