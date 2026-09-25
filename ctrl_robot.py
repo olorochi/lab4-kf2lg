@@ -38,6 +38,7 @@ from param import (
 )
 from robot import Robot
 from traqueur_distance import TraqueurDistance, MoteurTraque as Moteur
+from external import PWMOutputDevice, DigitalInputDevice, DigitalOutputDevice
 
 
 class CtrlRobot(EvApp):
@@ -189,17 +190,6 @@ class CtrlRobot(EvApp):
 
 
 def creer_controleur(port_no=APP_CTRL_ROBOT):
-    try:
-        from gpiozero import (
-            DigitalInputDevice,
-            DigitalOutputDevice,
-            PWMOutputDevice,
-        )
-    except ImportError as erreur:
-        raise SystemExit(
-            "gpiozero est necessaire: "
-        ) from erreur
-
     traqueur_gauche = TraqueurDistance(
             DigitalInputDevice(ENCODEUR_GAUCHE_GPIO)
     )

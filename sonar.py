@@ -28,19 +28,10 @@ from param import (
 )
 
 
-def _charger_gpiozero():
-    try:
-        from gpiozero import DigitalInputDevice, DigitalOutputDevice
-    except ImportError as erreur:
-        raise SystemExit("gpiozero est necessaire sur le Pi") from erreur
-    return DigitalInputDevice, DigitalOutputDevice
-
-
 class Signaleur:
 
     def __init__(self, gpio_del, sortie_factory=None):
-        if sortie_factory is None:
-            _, sortie_factory = _charger_gpiozero()
+        sortie_factory = sortie_factory or DigitalOutputDevice
 
         self._del = sortie_factory(gpio_del)
         self._periode = PERIODE_DEL_LENTE_S
@@ -175,10 +166,8 @@ class Sonar:
         grandeur_fenetre=FENETRE_LISSAGE_SONAR,
         identifiant=None,
     ):
-        if sortie_factory is None or entree_factory is None:
-            entree_gpiozero, sortie_gpiozero = _charger_gpiozero()
-            sortie_factory = sortie_factory or sortie_gpiozero
-            entree_factory = entree_factory or entree_gpiozero
+        sortie_factory = sortie_factory or DigitalOutputDevice
+        entree_factory = entree_factory or DigitalInputDevice
 
         self._trigger = sortie_factory(gpio_trigger)
         self._echo = entree_factory(gpio_echo, pull_up=False)
