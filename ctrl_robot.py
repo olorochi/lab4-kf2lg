@@ -150,12 +150,14 @@ class CtrlRobot(EvApp):
     def _traiter_commande(self, evenement):
         if evenement.type == MSG_BLOQUE:
             print("MSG_BLOQUE recu.")
+            self.obstacle = True
             if self.action == MSG_AVANCER:
                 self.robot.arreter()
         elif evenement.type == MSG_DEBLOQUE:
+            self.obstacle = False
             print("MSG_DEBLOQUE recu.")
             if self.action == MSG_AVANCER:
-                self.robot.arreter()
+                self.robot.avancer()
         elif evenement.type == MSG_VITESSE:
             self.robot.vitesse = self.lire_vitesse(evenement)
             print(f"MSG_VITESSE recu. {self.robot.vitesse}")

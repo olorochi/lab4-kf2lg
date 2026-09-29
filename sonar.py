@@ -6,6 +6,7 @@ import math
 import threading
 import time
 
+from external import DigitalInputDevice, DigitalOutputDevice
 from ev_app_client_api import fermer_client, gen_ev_externe
 from param import (
     APP_LIGNE,

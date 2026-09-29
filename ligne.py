@@ -17,6 +17,7 @@ from param import (
     MSG_POSITION,
     MSG_SONAR,
     MSG_BLOQUE,
+    MSG_DEBLOQUE,
     SEUIL_SONAR_ARRET_CM,
     SEUIL_SONAR_RAPIDE_CM,
     VITESSE_INITIALE,
@@ -137,13 +138,14 @@ class Ligne(EvApp):
     def _envoyer_obstacle(self, obstacle, distance):
         if self._obstacle != obstacle:
             self._obstacle = obstacle
-            if self._envoyer_controleur(MSG_BLOQUE, obstacle):
                 if obstacle:
+                    self._envoyer_controleur(MSG_BLOQUE):
                     self._afficher(
                         f"Obstacle a {distance:.2f} cm: "
                         "robot bloqué."
                     )
                 else:
+                    self._envoyer_controleur(MSG_DEBLOQUE):
                     self._afficher(
                         f"Zone degagée ({distance:.2f} cm): "
                         "robot débloqué."
