@@ -40,7 +40,7 @@ MOTEUR_DROIT_PWM = 18
 PWM_MIN = 0.0
 PWM_MAX = 1.0
 
-# Valeurs de depart pour une balle jaune
+# Valeurs pour une balle jaune
 TEINTE_MIN = (20, 114, 178)
 TEINTE_MAX = (40, 255, 255)
 AIRE_BALLE_MIN = 300
