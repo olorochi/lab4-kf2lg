@@ -1,3 +1,4 @@
+import errno
 import socket
 import select
 import struct
@@ -30,7 +31,11 @@ class EvApp:
         self.tmo = tmo
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udp_sock.setblocking(False)
-        self.udp_sock.bind((host_ip, port_no))
+        try:
+            self.udp_sock.bind((host_ip, port_no))
+        except OSError:
+            self.udp_sock.close()
+            raise
 
     def dispatch_event(self, ev):
         print(ev)
@@ -41,6 +46,13 @@ class EvApp:
     def quitter(self):
         pass
 
+    @staticmethod
+    def decoder_message(message):
+        if len(message) != TAILLE_MSG_TOT:
+            raise ValueError("Taille de message UDP invalide")
+        type_message, donnees = struct.unpack(MSG_PACK_FORMAT, message)
+        return EvDesc(type_message, donnees.decode("utf-8").rstrip("\x00"))
+
     def run(self):
         try:
             while not self._termine:
@@ -49,21 +61,26 @@ class EvApp:
                     self.dispatch_event(None)
                     continue
 
-                message, _ = self.udp_sock.recvfrom(TAILLE_MSG_TOT)
                 try:
-                    type_message, donnees = struct.unpack(MSG_PACK_FORMAT, message)
-                except struct.error:
-                    print("Message UDP invalide ignore")
+                    message, _ = self.udp_sock.recvfrom(TAILLE_MSG_TOT + 1)
+                except OSError as erreur:
+                    if erreur.errno not in (errno.EMSGSIZE, 10040):
+                        raise
+                    print("Message UDP trop grand ignore")
+                    self.dispatch_event(None)
                     continue
-
-                evenement = EvDesc(
-                    type_message,
-                    donnees.decode("utf-8").rstrip("\x00"),
-                )
+                try:
+                    evenement = self.decoder_message(message)
+                except (struct.error, UnicodeDecodeError, ValueError):
+                    print("Message UDP invalide ignore")
+                    self.dispatch_event(None)
+                    continue
                 self.dispatch_event(evenement)
         except KeyboardInterrupt:
             pass
         finally:
             self._termine = True
-            self.quitter()
-            self.udp_sock.close()
+            try:
+                self.quitter()
+            finally:
+                self.udp_sock.close()
