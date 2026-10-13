@@ -19,8 +19,7 @@ FENETRE_IMAGE = "Suiveur - camera Pi"
 FENETRE_MASQUE = "Suiveur - masque HSV"
 
 
-def choisir_commande(aire, centre_x, largeur, aire_min=AIRE_BALLE_MIN,
-                     aire_max=AIRE_BALLE_MAX, marge=MARGE_CENTRE):
+def choisir_commande(aire, centre_x, largeur, aire_min=AIRE_BALLE_MIN, aire_max=AIRE_BALLE_MAX, marge=MARGE_CENTRE):
     """Priorite a l'arret hors distance, puis a l'alignement horizontal."""
     if aire <= 0 or aire < aire_min or aire > aire_max:
         return MSG_ARRETER
@@ -32,9 +31,7 @@ def choisir_commande(aire, centre_x, largeur, aire_min=AIRE_BALLE_MIN,
 
 
 class Suiveur(EvApp):
-    def __init__(self, port_no=APP_SUIVEUR, ip_robot="127.0.0.1",
-                 detecteur=None, envoyer=gen_ev_externe,
-                 horloge=time.monotonic, affichage=True, **app_options):
+    def __init__(self, port_no=APP_SUIVEUR, ip_robot="127.0.0.1", detecteur=None, envoyer=gen_ev_externe, horloge=time.monotonic, affichage=True, **app_options):
         if detecteur is None:
             from detecteur_hsv import Detecteur_hsv
             detecteur = Detecteur_hsv()
@@ -52,8 +49,7 @@ class Suiveur(EvApp):
         self._filtre_mode = FiltreMode()
 
     def envoyer_commande(self, commande):
-        self._envoyer(self.ip_robot, APP_CTRL_ROBOT,
-                      MSG_COMMANDE_SUIVEUR, commande)
+        self._envoyer(self.ip_robot, APP_CTRL_ROBOT, MSG_COMMANDE_SUIVEUR, commande)
 
     def desactiver(self):
         self.actif = False
@@ -96,10 +92,8 @@ class Suiveur(EvApp):
         hauteur, largeur = image.shape[:2]
         for x in (largeur // 2 - MARGE_CENTRE, largeur // 2 + MARGE_CENTRE):
             cv2.line(image, (x, 0), (x, hauteur - 1), (255, 255, 0), 1)
-        noms = {MSG_ARRETER: "ARRET", MSG_AVANCER: "AVANCE",
-                MSG_PIVOTER_G: "GAUCHE", MSG_PIVOTER_D: "DROITE"}
-        cv2.putText(image, f"Aire: {aire} px | {noms[commande]}", (5, 18),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.42, (255, 255, 255), 1)
+        noms = {MSG_ARRETER: "ARRET", MSG_AVANCER: "AVANCE", MSG_PIVOTER_G: "GAUCHE", MSG_PIVOTER_D: "DROITE"}
+        cv2.putText(image, f"Aire: {aire} px | {noms[commande]}", (5, 18), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (255, 255, 255), 1)
         cv2.imshow(FENETRE_IMAGE, image)
         cv2.imshow(FENETRE_MASQUE, masque)
         touche = cv2.waitKeyEx(1)
@@ -165,11 +159,9 @@ class Suiveur(EvApp):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ip-robot", default="127.0.0.1")
-    parser.add_argument("--sans-affichage", action="store_true",
-                        help="Executer sur le Pi sans bureau graphique.")
+    parser.add_argument("--sans-affichage", action="store_true", help="Executer sur le Pi sans affichage.")
     options = parser.parse_args()
-    suiveur = Suiveur(ip_robot=options.ip_robot,
-                      affichage=not options.sans_affichage)
+    suiveur = Suiveur(ip_robot=options.ip_robot, affichage=not options.sans_affichage)
     print(f"Suiveur en ecoute sur le port {APP_SUIVEUR}; camera en attente du mode 2.")
     try:
         suiveur.run()
